@@ -32,6 +32,8 @@ import io.github.zeus.rpc.LiteralExpression;
 import io.github.zeus.rpc.ScalarFuncId;
 import io.github.zeus.rpc.ScalarFunction;
 import io.github.zeus.schema.ZeusTable;
+import io.github.zeus.types.TypeMapping;
+import org.apache.drill.common.expression.BooleanOperator;
 import org.apache.drill.common.expression.FunctionCall;
 import org.apache.drill.common.expression.LogicalExpression;
 import org.apache.drill.common.expression.SchemaPath;
@@ -70,55 +72,61 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
 
   @Override
   public Optional<Expression> visitFunctionCall(FunctionCall call, Void value) throws RuntimeException {
-
-    ImmutableList.Builder<ColumnType> argTypesBuilder = ImmutableList.builder();
-    List<Expression> argExprs = new ArrayList<>(call.args.size());
-
-    for (LogicalExpression arg : call.args) {
-      Optional<Expression> argExpr = arg.accept(this, null);
-      if (!argExpr.isPresent()) {
-        return Optional.empty();
+    do {
+      Optional<ColumnType> retType = TypeMapping.zeusTypeOf(call.getMajorType().getMinorType());
+      if (!retType.isPresent()) {
+        break;
       }
 
-      argTypesBuilder.add(argExpr.get().getFieldType());
-      argExprs.add(argExpr.get());
-    }
+      ImmutableList.Builder<ColumnType> argTypesBuilder = ImmutableList.builder();
+      List<Expression> argExprs = new ArrayList<>(call.args.size());
 
-    ZeusFunctionSignature sig = new ZeusFunctionSignature(call.getName(), argTypesBuilder.build());
+      for (LogicalExpression arg : call.args) {
+        Optional<Expression> argExpr = arg.accept(this, null);
+        if (!argExpr.isPresent()) {
+          break;
+        }
 
-    Optional<ScalarFuncId> scalarFuncIdOpt = DrillFunctions.zeusScalarFuncOf(sig);
-    Optional<AggFuncId> aggFuncIdOpt = DrillFunctions.zeusAggFuncOf(sig);
+        argTypesBuilder.add(argExpr.get().getFieldType());
+        argExprs.add(argExpr.get());
+      }
 
-    if (scalarFuncIdOpt.isPresent()) {
-      ScalarFunction scalarFunction = ScalarFunction.newBuilder()
+      ZeusFunctionSignature sig = new ZeusFunctionSignature(call.getName(), argTypesBuilder.build());
+
+      Optional<ScalarFuncId> scalarFuncIdOpt = DrillFunctions.zeusScalarFuncOf(sig);
+      Optional<AggFuncId> aggFuncIdOpt = DrillFunctions.zeusAggFuncOf(sig);
+
+      if (scalarFuncIdOpt.isPresent()) {
+        ScalarFunction scalarFunction = ScalarFunction.newBuilder()
           .setFuncId(scalarFuncIdOpt.get())
           .addAllChildren(argExprs)
           .build();
 
-      return Optional.of(Expression.newBuilder()
+        return Optional.of(Expression.newBuilder()
           .setExpressionType(ExpressionType.SCALAR_FUNCTION)
           .setScalarFunc(scalarFunction)
-          .setFieldType(ColumnType.BOOL)
+          .setFieldType(retType.get())
           .setAlias(nextAnonymousName())
           .build()
-      );
-    } else if (aggFuncIdOpt.isPresent()) {
-      AggFunction aggFunction = AggFunction.newBuilder()
+        );
+      } else if (aggFuncIdOpt.isPresent()) {
+        AggFunction aggFunction = AggFunction.newBuilder()
           .setFuncId(aggFuncIdOpt.get())
           .addAllChildren(argExprs)
           .build();
 
-      return Optional.of(Expression.newBuilder()
+        return Optional.of(Expression.newBuilder()
           .setExpressionType(ExpressionType.AGG_FUNCTION)
           .setAggFunc(aggFunction)
-          .setFieldType(ColumnType.INT64)
+          .setFieldType(retType.get())
           .setAlias(nextAnonymousName())
           .build()
-      );
-    } else {
-      LOG.info("Unable to transform expression: {}", serializeLogicalExpression(call));
-      return Optional.empty();
-    }
+        );
+      }
+    } while(false);
+
+    LOG.info("Unable to transform expression: {}", serializeLogicalExpression(call));
+    return Optional.empty();
   }
 
   @Override
@@ -209,6 +217,55 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
   private String nextAnonymousName() {
     nextID += 1;
     return "$_" + nextID;
+  }
+
+  @Override
+  public Optional<Expression> visitBooleanOperator(BooleanOperator call, Void value) {
+    do {
+      ImmutableList.Builder<ColumnType> argTypesBuilder = ImmutableList.builder();
+      List<Expression> argExprs = new ArrayList<>(call.args.size());
+
+      for (LogicalExpression arg : call.args) {
+        Optional<Expression> argExpr = arg.accept(this, null);
+        if (!argExpr.isPresent()) {
+          break;
+        }
+
+        argTypesBuilder.add(argExpr.get().getFieldType());
+        argExprs.add(argExpr.get());
+      }
+
+      ScalarFuncId scalarFuncId;
+      switch(call.getName()) {
+        case "booleanAnd":
+          scalarFuncId = ScalarFuncId.AND;
+          break;
+        case "booleanOr":
+          scalarFuncId = ScalarFuncId.OR;
+          break;
+        default:
+          scalarFuncId = null;
+      }
+
+      if (scalarFuncId == null) {
+        break;
+      }
+
+      ScalarFunction scalarFunction = ScalarFunction.newBuilder()
+        .setFuncId(scalarFuncId)
+        .addAllChildren(argExprs)
+        .build();
+
+      return Optional.of(Expression.newBuilder()
+          .setExpressionType(ExpressionType.SCALAR_FUNCTION)
+          .setScalarFunc(scalarFunction)
+          .setFieldType(ColumnType.BOOL)
+          .setAlias(nextAnonymousName())
+          .build();
+    } while(false);
+
+    LOG.info("Unable to transform expression: {}", serializeLogicalExpression(call));
+    return Optional.empty();
   }
 
   private static String serializeLogicalExpression(LogicalExpression e) {
