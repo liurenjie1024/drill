@@ -20,17 +20,17 @@ package io.github.zeus.expr.drill;
 import io.github.zeus.expr.ZeusFunctionEntry;
 {% for item in imported_scalar_func_ids %}
 import static io.github.zeus.rpc.ScalarFuncId.{{item}};
-{%- endfor %}
-{% for item in imported_column_types %}
+  {%- endfor %}
+  {% for item in imported_column_types %}
 import static io.github.zeus.rpc.ColumnType.{{item}};
-{%- endfor %}
+  {%- endfor %}
 
 /**
  * This class is generated.
  */
-public class ComparatorFunctionSignatures {
+public class MathFunctions {
   {% for item in items %}
-    public static final ZeusFunctionEntry {{item.name}} = ZeusFunctionEntry.from({{item
+  public static final ZeusFunctionEntry {{item.name}} = ZeusFunctionEntry.from({{item
     .scalar_func_id}}, "{{item.drill_func_name}}", {{item.args|join(', ')}});
   {%- endfor %}
 }

@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.github.zeus.expr.drill.AggFunctions;
 import io.github.zeus.expr.drill.ComparatorFunctions;
+import io.github.zeus.expr.drill.LogicalFunctions;
 import io.github.zeus.rpc.AggFuncId;
 import io.github.zeus.rpc.ScalarFuncId;
 
@@ -39,6 +40,8 @@ public class DrillFunctions {
   static {
     ImmutableSet<Class<?>> DRILL_FUNCTIONS_CLASSES =
         ImmutableSet.<Class<?>>builder()
+            .add(ComparatorFunctions.class)
+            .add(LogicalFunctions.class)
             .add(ComparatorFunctions.class)
             .add(AggFunctions.class)
             .build();
