@@ -70,6 +70,10 @@ public class DrillFunctions {
         .collect(Collectors.toList());
   }
 
+  static Optional<ZeusFunctionEntry> zeusFunctionOf(ZeusFunctionSignature signature) {
+    return Optional.ofNullable(DRILL_FUNCTIONS.get(signature));
+  }
+
   static Optional<ScalarFuncId> zeusScalarFuncOf(ZeusFunctionSignature signature) {
     return Optional.ofNullable(DRILL_FUNCTIONS.get(signature))
         .flatMap(ZeusFunctionEntry::getScalarFuncId);

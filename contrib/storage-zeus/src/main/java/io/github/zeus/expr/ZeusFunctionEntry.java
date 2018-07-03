@@ -25,20 +25,22 @@ import io.github.zeus.rpc.ScalarFuncId;
 import java.util.Optional;
 
 public class ZeusFunctionEntry {
+  private final ColumnType returnType;
   private final ZeusFunctionSignature signature;
   private final Optional<ScalarFuncId > scalarFuncId;
   private final Optional<AggFuncId> aggFuncId;
 
-  public ZeusFunctionEntry(ZeusFunctionSignature signature, ScalarFuncId scalarFuncId) {
-    this(signature, Optional.of(scalarFuncId), Optional.empty());
+  public ZeusFunctionEntry(ColumnType returnType, ZeusFunctionSignature signature, ScalarFuncId scalarFuncId) {
+    this(returnType, signature, Optional.of(scalarFuncId), Optional.empty());
   }
 
-  public ZeusFunctionEntry(ZeusFunctionSignature signature, AggFuncId aggFuncId) {
-    this(signature, Optional.empty(), Optional.of(aggFuncId));
+  public ZeusFunctionEntry(ZeusFunctionSignature signature, AggFuncId aggFuncId, ColumnType returnType) {
+    this(returnType, signature, Optional.empty(), Optional.of(aggFuncId));
   }
 
-  private ZeusFunctionEntry(ZeusFunctionSignature signature, Optional<ScalarFuncId> scalarFuncId,
-                            Optional<AggFuncId> aggFuncId) {
+  private ZeusFunctionEntry(ColumnType returnType, ZeusFunctionSignature signature,
+                            Optional<ScalarFuncId> scalarFuncId, Optional<AggFuncId> aggFuncId) {
+    this.returnType = returnType;
     this.signature = signature;
     this.scalarFuncId = scalarFuncId;
     this.aggFuncId = aggFuncId;
@@ -57,11 +59,17 @@ public class ZeusFunctionEntry {
     return aggFuncId;
   }
 
-  public static ZeusFunctionEntry from(ScalarFuncId scalarFuncId, String name, ColumnType... argTypes) {
-    return new ZeusFunctionEntry(ZeusFunctionSignature.from(name, argTypes), scalarFuncId);
+  public ColumnType getReturnType() {
+    return returnType;
   }
 
-  public static ZeusFunctionEntry from(AggFuncId aggFuncId, String name, ColumnType... argTypes) {
-    return new ZeusFunctionEntry(ZeusFunctionSignature.from(name, argTypes), aggFuncId);
+  public static ZeusFunctionEntry from(ScalarFuncId scalarFuncId, ColumnType returnType,
+                                       String name, ColumnType... argTypes) {
+    return new ZeusFunctionEntry(returnType, ZeusFunctionSignature.from(name, argTypes), scalarFuncId);
+  }
+
+  public static ZeusFunctionEntry from(AggFuncId aggFuncId, ColumnType returnType,
+                                       String name, ColumnType... argTypes) {
+    return new ZeusFunctionEntry(ZeusFunctionSignature.from(name, argTypes), aggFuncId, returnType);
   }
 }
