@@ -261,7 +261,7 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
           .setScalarFunc(scalarFunction)
           .setFieldType(ColumnType.BOOL)
           .setAlias(nextAnonymousName())
-          .build();
+          .build());
     } while(false);
 
     LOG.info("Unable to transform expression: {}", serializeLogicalExpression(call));
