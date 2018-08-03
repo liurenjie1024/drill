@@ -77,7 +77,7 @@ public class PushFilterToScanRule extends RelOptRule {
       ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(filterPlanNode);
       newGroupScan.setFilterPushedDown(true);
 
-      tryToPushFilterToScan(zeusExpr.get(), newGroupScan);
+      newGroupScan = tryToPushFilterToScan(zeusExpr.get(), newGroupScan);
 
       DrillScanRel newScan = new DrillScanRel(
         scanRel.getCluster(),
