@@ -124,7 +124,22 @@ public class PushFilterToScanRule extends RelOptRule {
         if (scanPlanNode.getPlanNodeType() == PlanNodeType.SCAN_NODE &&
           scanPlanNode.getScanNode() != null) {
           ScanNode scanNode = scanPlanNode.getScanNode();
-          scanNode.getFiltersList().add(filterExpression);
+
+          // create new group scan
+          ScanNode newScanNode = ScanNode.newBuilder(scanNode)
+            .addFilters(filterExpression)
+            .build();
+          PlanNode newScanPlanNode = PlanNode.newBuilder()
+            .setScanNode(newScanNode)
+            .setPlanNodeType(PlanNodeType.SCAN_NODE)
+            .build();
+
+          PlanNode newRoot = PlanNode.newBuilder(root)
+            .clearChildren()
+            .addChildren(newScanPlanNode)
+            .build();
+
+          return scan.cloneWithNewPlanReplaced(newRoot);
         }
       }
     }

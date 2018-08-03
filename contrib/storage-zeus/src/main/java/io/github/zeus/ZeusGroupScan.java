@@ -173,6 +173,11 @@ public class ZeusGroupScan extends AbstractGroupScan {
       isFilterPushedDown, isProjectPushedDown, isTopNPushedDown, isAggPushedDown);
   }
 
+  public ZeusGroupScan cloneWithNewPlanReplaced(PlanNode newPlan) {
+    return new ZeusGroupScan(tableId, queryPlan.replacePlan(newPlan), config, plugin,
+      isFilterPushedDown, isProjectPushedDown, isTopNPushedDown, isAggPushedDown);
+  }
+
   public void setRowCount(long rowCount) {
     this.rowCount = rowCount;
   }

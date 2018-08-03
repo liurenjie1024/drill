@@ -106,6 +106,14 @@ public class ZeusQueryPlan {
     return ZeusQueryPlan.from(newPlan);
   }
 
+  public ZeusQueryPlan replacePlan(PlanNode newRoot) {
+    QueryPlan newPlan = QueryPlan.newBuilder(plan)
+      .setRoot(newRoot)
+      .build();
+
+    return ZeusQueryPlan.from(newPlan);
+  }
+
   private static QueryPlan parseJsonPlan(String jsonPlan) {
     QueryPlan.Builder builder =  QueryPlan.newBuilder();
     try {
