@@ -25,6 +25,8 @@ import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.FilterNode;
 import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
+import io.github.zeus.rpc.QueryPlan;
+import io.github.zeus.rpc.ScanNode;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.rex.RexNode;
@@ -75,6 +77,8 @@ public class PushFilterToScanRule extends RelOptRule {
       ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(filterPlanNode);
       newGroupScan.setFilterPushedDown(true);
 
+      tryToPushFilterToScan(zeusExpr.get(), newGroupScan);
+
       DrillScanRel newScan = new DrillScanRel(
         scanRel.getCluster(),
         filterRel.getTraitSet(),
@@ -101,6 +105,31 @@ public class PushFilterToScanRule extends RelOptRule {
 
       call.transformTo(filterRel.copy(filterRel.getTraitSet(), ImmutableList.of(newScan)));
     }
+  }
+
+  /**
+   * If the plan is filter -> scan, then push filter down to scan so that we can skip some groups.
+   * @param filterExpression
+   * @param scan
+   * @return
+   */
+  private static ZeusGroupScan tryToPushFilterToScan(Expression filterExpression,
+                                                     ZeusGroupScan scan) {
+    QueryPlan plan = scan.getPlan().getPlan();
+
+    if (plan.getRoot().getPlanNodeType() == PlanNodeType.FILTER_NODE) {
+      PlanNode root = plan.getRoot();
+      if (root.getChildrenCount() > 0) {
+        PlanNode scanPlanNode = root.getChildren(0);
+        if (scanPlanNode.getPlanNodeType() == PlanNodeType.SCAN_NODE &&
+          scanPlanNode.getScanNode() != null) {
+          ScanNode scanNode = scanPlanNode.getScanNode();
+          scanNode.getFiltersList().add(filterExpression);
+        }
+      }
+    }
+
+    return scan;
   }
 
 

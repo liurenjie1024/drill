@@ -213,4 +213,8 @@ public class ZeusGroupScan extends AbstractGroupScan {
   public ZeusTable getTable() {
     return plugin.getDbSchema().getTable(tableId).get();
   }
+
+  public ZeusQueryPlan getPlan() {
+    return queryPlan;
+  }
 }
