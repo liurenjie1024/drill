@@ -18,6 +18,7 @@
 
 package io.github.zeus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.zeus.client.ZeusClient;
@@ -94,6 +95,7 @@ public class ZeusStoragePlugin extends AbstractStoragePlugin {
     logger.info("Succeeded to start zeus plugin.");
   }
 
+  @JsonIgnore
   public ZeusClient getClient() {
     return client;
   }

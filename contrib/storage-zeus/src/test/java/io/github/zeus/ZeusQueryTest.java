@@ -17,19 +17,16 @@
  */
 package io.github.zeus;
 
-import org.apache.drill.categories.SlowTest;
 import org.apache.drill.categories.ZeusStorageTest;
-import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.List;
-
-@Category({ZeusStorageTest.class, SlowTest.class})
+@Category({ZeusStorageTest.class})
 public class ZeusQueryTest extends ZeusTestBase {
-  @Test
-  public void testQueryCount() throws Exception {
-//    List<QueryDataBatch> result =  testSqlWithResults("select * from logs.realtimelog limit 3");
-  }
 
+  @Test
+  public void testSelectAllPlan() throws Exception {
+    verifyZeusPlanForSql("select * from logs.realtimelog where logtime >= 10000 AND logtime < 20000",
+      "select_with_filter_plan.json");
+  }
 }

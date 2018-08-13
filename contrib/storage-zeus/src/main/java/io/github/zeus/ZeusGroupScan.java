@@ -20,6 +20,7 @@ package io.github.zeus;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.github.zeus.client.exception.CatalogNotFoundException;
@@ -215,6 +216,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
     return this;
   }
 
+  @JsonIgnore
   public ZeusTable getTable() {
     return plugin.getDbSchema().getTable(tableId).get();
   }

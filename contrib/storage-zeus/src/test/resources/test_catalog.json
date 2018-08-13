@@ -1,0 +1,238 @@
+{
+  "dbSchemas": [{
+    "name": "logs",
+    "id": 1,
+    "tables": {
+      "1": {
+        "name": "realtimelog",
+        "id": 1,
+        "columns": {
+          "1": {
+            "name": "advertiserId",
+            "id": 1,
+            "columnType": "INT32"
+          },
+          "2": {
+            "name": "campaignId",
+            "id": 2,
+            "columnType": "INT32"
+          },
+          "3": {
+            "name": "solutionId",
+            "id": 3,
+            "columnType": "INT32"
+          },
+          "6": {
+            "name": "creativeId",
+            "id": 6,
+            "columnType": "INT32"
+          },
+          "7": {
+            "name": "adspaceId",
+            "id": 7,
+            "columnType": "INT32"
+          },
+          "8": {
+            "name": "adspaceSlot",
+            "id": 8,
+            "columnType": "INT8"
+          },
+          "9": {
+            "name": "publisherId",
+            "id": 9,
+            "columnType": "INT32"
+          },
+          "10": {
+            "name": "keywordId",
+            "id": 10,
+            "columnType": "INT64"
+          },
+          "11": {
+            "name": "keywordHashId",
+            "id": 11,
+            "columnType": "INT64"
+          },
+          "13": {
+            "name": "exchange",
+            "id": 13,
+            "columnType": "STRING"
+          },
+          "14": {
+            "name": "logId",
+            "id": 14,
+            "columnType": "STRING"
+          },
+          "15": {
+            "name": "fee",
+            "id": 15,
+            "columnType": "INT64"
+          },
+          "16": {
+            "name": "numOfClick",
+            "id": 16,
+            "columnType": "INT64"
+          },
+          "17": {
+            "name": "numOfShow",
+            "id": 17,
+            "columnType": "INT64"
+          },
+          "18": {
+            "name": "numOfInvalidClick",
+            "id": 18,
+            "columnType": "INT64"
+          },
+          "19": {
+            "name": "numOfInvalidShow",
+            "id": 19,
+            "columnType": "INT64"
+          },
+          "20": {
+            "name": "winPrice",
+            "id": 20,
+            "columnType": "INT64"
+          },
+          "21": {
+            "name": "dmpFee",
+            "id": 21,
+            "columnType": "INT64"
+          },
+          "22": {
+            "name": "timestamp",
+            "id": 22,
+            "columnType": "INT64"
+          },
+          "23": {
+            "name": "numOfPhysicalShow",
+            "id": 23,
+            "columnType": "INT64"
+          },
+          "24": {
+            "name": "uaMobileFlag",
+            "id": 24
+          },
+          "25": {
+            "name": "appFlag",
+            "id": 25
+          },
+          "26": {
+            "name": "domain",
+            "id": 26,
+            "columnType": "STRING"
+          },
+          "27": {
+            "name": "realFee",
+            "id": 27,
+            "columnType": "INT64"
+          },
+          "29": {
+            "name": "agencyFee",
+            "id": 29,
+            "columnType": "INT64"
+          },
+          "30": {
+            "name": "qAdvertiserId",
+            "id": 30,
+            "columnType": "INT64"
+          },
+          "31": {
+            "name": "qCampaignId",
+            "id": 31,
+            "columnType": "INT64"
+          },
+          "32": {
+            "name": "qSolutionId",
+            "id": 32,
+            "columnType": "INT64"
+          },
+          "33": {
+            "name": "qBannerId",
+            "id": 33,
+            "columnType": "INT64"
+          },
+          "34": {
+            "name": "seqId",
+            "id": 34,
+            "columnType": "INT64"
+          },
+          "36": {
+            "name": "idc",
+            "id": 36,
+            "columnType": "INT32"
+          },
+          "37": {
+            "name": "platform",
+            "id": 37,
+            "columnType": "STRING"
+          },
+          "38": {
+            "name": "ltxPid",
+            "id": 38,
+            "columnType": "INT32"
+          },
+          "39": {
+            "name": "adspaceDisplayType",
+            "id": 39,
+            "columnType": "INT32"
+          },
+          "40": {
+            "name": "grayVersion",
+            "id": 40,
+            "columnType": "INT32"
+          },
+          "41": {
+            "name": "dspId",
+            "id": 41,
+            "columnType": "INT32"
+          },
+          "43": {
+            "name": "overChargeFee",
+            "id": 43,
+            "columnType": "INT64"
+          },
+          "44": {
+            "name": "imei",
+            "id": 44,
+            "columnType": "STRING"
+          },
+          "45": {
+            "name": "dealMode",
+            "id": 45,
+            "columnType": "INT16"
+          },
+          "46": {
+            "name": "overChargeRealFee",
+            "id": 46,
+            "columnType": "INT64"
+          },
+          "47": {
+            "name": "imeiMD5",
+            "id": 47,
+            "columnType": "STRING"
+          },
+          "48": {
+            "name": "quality",
+            "id": 48,
+            "columnType": "INT32"
+          },
+          "49": {
+            "name": "fraudWinPrice",
+            "id": 49,
+            "columnType": "INT64"
+          },
+          "50": {
+            "name": "dealId",
+            "id": 50,
+            "columnType": "INT64"
+          },
+          "51": {
+            "name": "predictedRPM",
+            "id": 51,
+            "columnType": "INT64"
+          }
+        },
+        "format": "blizard"
+      }
+    }
+  }]
+}
