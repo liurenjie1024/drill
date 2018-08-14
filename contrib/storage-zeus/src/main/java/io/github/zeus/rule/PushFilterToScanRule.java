@@ -21,6 +21,8 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
+import io.github.zeus.rel.ZeusFilterNode;
+import io.github.zeus.rel.ZeusRelNode;
 import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.FilterNode;
 import io.github.zeus.rpc.PlanNode;
@@ -69,13 +71,10 @@ public class PushFilterToScanRule extends RelOptRule {
           .addConditions(zeusExpr.get())
           .build();
 
-      PlanNode filterPlanNode = PlanNode.newBuilder()
-          .setPlanNodeType(PlanNodeType.FILTER_NODE)
-          .setFilterNode(filterNode)
-          .build();
+      ZeusFilterNode newRoot = new ZeusFilterNode(groupScan.getRootRelNode(), filterNode);
 
-      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(filterPlanNode);
-      newGroupScan.setFilterPushedDown(true);
+      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(newRoot)
+        .setRulePushedDown(PushedDownRule.FILTER);
 
       newGroupScan = tryToPushFilterToScan(zeusExpr.get(), newGroupScan);
 
@@ -90,8 +89,8 @@ public class PushFilterToScanRule extends RelOptRule {
       call.transformTo(newScan);
 
     } else {
-      ZeusGroupScan newGroupScan = groupScan.copy();
-      newGroupScan.setFilterPushedDown(true);
+      ZeusGroupScan newGroupScan = groupScan.copy()
+        .setRulePushedDown(PushedDownRule.FILTER);
 
 
       DrillScanRel newScan = new DrillScanRel(
@@ -115,7 +114,9 @@ public class PushFilterToScanRule extends RelOptRule {
    */
   private static ZeusGroupScan tryToPushFilterToScan(Expression filterExpression,
                                                      ZeusGroupScan scan) {
-    QueryPlan plan = scan.getPlan().getPlan();
+    ZeusRelNode root = scan.getRootRelNode();
+
+    if (root ins)
 
     if (plan.getRoot().getPlanNodeType() == PlanNodeType.FILTER_NODE) {
       PlanNode root = plan.getRoot();

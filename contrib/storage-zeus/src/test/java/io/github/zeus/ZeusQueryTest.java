@@ -26,7 +26,7 @@ public class ZeusQueryTest extends ZeusTestBase {
 
   @Test
   public void testSelectAllPlan() throws Exception {
-    verifyZeusPlanForSql("select * from logs.realtimelog where logtime >= 10000 AND logtime < 20000",
+    verifyZeusPlanForSql("select * from logs.realtimelog where `timestamp` >= 10000 AND `timestamp`< 20000",
       "select_with_filter_plan.json");
   }
 }
