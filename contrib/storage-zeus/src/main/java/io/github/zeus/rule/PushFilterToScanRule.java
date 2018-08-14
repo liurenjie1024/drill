@@ -23,12 +23,9 @@ import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
 import io.github.zeus.rel.ZeusFilterNode;
 import io.github.zeus.rel.ZeusRelNode;
+import io.github.zeus.rel.ZeusScanNode;
 import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.FilterNode;
-import io.github.zeus.rpc.PlanNode;
-import io.github.zeus.rpc.PlanNodeType;
-import io.github.zeus.rpc.QueryPlan;
-import io.github.zeus.rpc.ScanNode;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.rex.RexNode;
@@ -37,9 +34,7 @@ import org.apache.drill.exec.planner.logical.DrillFilterRel;
 import org.apache.drill.exec.planner.logical.DrillOptiq;
 import org.apache.drill.exec.planner.logical.DrillParseContext;
 import org.apache.drill.exec.planner.logical.DrillScanRel;
-import org.apache.drill.exec.planner.physical.FilterPrel;
 import org.apache.drill.exec.planner.physical.PrelUtil;
-import org.apache.drill.exec.planner.physical.ScanPrel;
 
 import java.util.Optional;
 
@@ -73,7 +68,7 @@ public class PushFilterToScanRule extends RelOptRule {
 
       ZeusFilterNode newRoot = new ZeusFilterNode(groupScan.getRootRelNode(), filterNode);
 
-      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(newRoot)
+      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot)
         .setRulePushedDown(PushedDownRule.FILTER);
 
       newGroupScan = tryToPushFilterToScan(zeusExpr.get(), newGroupScan);
@@ -116,32 +111,18 @@ public class PushFilterToScanRule extends RelOptRule {
                                                      ZeusGroupScan scan) {
     ZeusRelNode root = scan.getRootRelNode();
 
-    if (root ins)
+    if ((root != null) && (root instanceof ZeusFilterNode)) {
+      ZeusFilterNode filterNode = (ZeusFilterNode) root;
 
-    if (plan.getRoot().getPlanNodeType() == PlanNodeType.FILTER_NODE) {
-      PlanNode root = plan.getRoot();
-      if (root.getChildrenCount() > 0) {
-        PlanNode scanPlanNode = root.getChildren(0);
-        if (scanPlanNode.getPlanNodeType() == PlanNodeType.SCAN_NODE &&
-          scanPlanNode.getScanNode() != null) {
-          ScanNode scanNode = scanPlanNode.getScanNode();
+      ZeusRelNode child = filterNode.getInput();
 
-          // create new group scan
-          ScanNode newScanNode = ScanNode.newBuilder(scanNode)
-            .addFilters(filterExpression)
-            .build();
-          PlanNode newScanPlanNode = PlanNode.newBuilder()
-            .setScanNode(newScanNode)
-            .setPlanNodeType(PlanNodeType.SCAN_NODE)
-            .build();
+      if ((child != null) && (child instanceof ZeusScanNode)) {
+        ZeusScanNode scanNode = (ZeusScanNode) child;
 
-          PlanNode newRoot = PlanNode.newBuilder(root)
-            .clearChildren()
-            .addChildren(newScanPlanNode)
-            .build();
+        ZeusScanNode newScanNode = scanNode.cloneWithFilters(filterExpression);
+        ZeusFilterNode newFilterNode = filterNode.cloneWithNewInput(newScanNode);
 
-          return scan.cloneWithNewPlanReplaced(newRoot);
-        }
+        return scan.cloneWithNewRootRelNode(newFilterNode);
       }
     }
 
@@ -158,7 +139,7 @@ public class PushFilterToScanRule extends RelOptRule {
     }
 
     ZeusGroupScan groupScan = (ZeusGroupScan) scanPrel.getGroupScan();
-    if (groupScan.isFilterPushedDown()) {
+    if (groupScan.isRulePushedDown(PushedDownRule.FILTER)) {
       return false;
     }
 

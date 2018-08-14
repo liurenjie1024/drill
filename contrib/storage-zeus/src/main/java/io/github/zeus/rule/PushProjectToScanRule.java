@@ -36,8 +36,6 @@ import org.apache.drill.exec.planner.logical.DrillParseContext;
 import org.apache.drill.exec.planner.logical.DrillProjectRel;
 import org.apache.drill.exec.planner.logical.DrillScanRel;
 import org.apache.drill.exec.planner.physical.PrelUtil;
-import org.apache.drill.exec.planner.physical.ProjectPrel;
-import org.apache.drill.exec.planner.physical.ScanPrel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +95,7 @@ public class PushProjectToScanRule extends RelOptRule {
         .setProjectNode(projectNode)
         .build();
 
-      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(newRoot);
+      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot);
       newGroupScan.setProjectPushedDown(true);
 
       DrillScanRel newScan = new DrillScanRel(

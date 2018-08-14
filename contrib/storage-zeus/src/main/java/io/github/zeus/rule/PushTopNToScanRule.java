@@ -61,7 +61,7 @@ public class PushTopNToScanRule extends RelOptRule {
     Optional<PlanNode> topNNode = topnNodeToPlanNode(limitDrel, sortDrel, call, zeusGroupScan.getTable(), scanDrel);
 
     if (topNNode.isPresent()) {
-      ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootPlanNode(topNNode.get());
+      ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(topNNode.get());
       newGroupScan.setTopNPushedDown(true);
 
       DrillScanRel newScanDrel = new DrillScanRel(scanDrel.getCluster(),

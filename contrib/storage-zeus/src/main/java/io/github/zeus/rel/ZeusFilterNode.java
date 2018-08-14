@@ -31,4 +31,8 @@ public class ZeusFilterNode extends ZeusSingleRelNode {
       inputScanStats.getCpuCost(),
       inputScanStats.getDiskCost());
   }
+
+  public ZeusFilterNode cloneWithNewInput(ZeusRelNode newInput) {
+    return new ZeusFilterNode(newInput, filterNode);
+  }
 }

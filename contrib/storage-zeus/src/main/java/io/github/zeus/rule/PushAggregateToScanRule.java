@@ -41,7 +41,6 @@ import org.apache.drill.exec.planner.physical.AggPrelBase.OperatorPhase;
 import org.apache.drill.exec.planner.physical.AggPruleBase;
 import org.apache.drill.exec.planner.physical.DrillDistributionTrait;
 import org.apache.drill.exec.planner.physical.DrillDistributionTraitDef;
-import org.apache.drill.exec.planner.physical.DrillScanPrel;
 import org.apache.drill.exec.planner.physical.HashAggPrel;
 import org.apache.drill.exec.planner.physical.HashToRandomExchangePrel;
 import org.apache.drill.exec.planner.physical.Prel;
@@ -178,7 +177,7 @@ public class PushAggregateToScanRule extends AggPruleBase {
         .setPlanNodeType(PlanNodeType.AGGREGATE_NODE)
         .build();
 
-    ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootPlanNode(newRoot);
+    ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot);
     newGroupScan.setRowCount(5);
     newGroupScan.setAggPushedDown(true);
 

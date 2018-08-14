@@ -14,7 +14,7 @@ public abstract class ZeusSingleRelNode implements ZeusRelNode {
     return Collections.singletonList(input);
   }
 
-  protected ZeusRelNode getInput() {
+  public ZeusRelNode getInput() {
     return input;
   }
 }

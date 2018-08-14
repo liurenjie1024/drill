@@ -142,6 +142,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
 
   public ZeusGroupScan setRulePushedDown(PushedDownRule rule) {
     pushedDownRules.set(rule.ordinal());
+    return this;
   }
 
   @Override
@@ -164,7 +165,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
     return true;
   }
 
-  public ZeusGroupScan cloneWithNewRootPlanNode(ZeusRelNode newRoot) {
+  public ZeusGroupScan cloneWithNewRootRelNode(ZeusRelNode newRoot) {
     return new ZeusGroupScan(tableId, newRoot, config, plugin, pushedDownRules);
   }
 

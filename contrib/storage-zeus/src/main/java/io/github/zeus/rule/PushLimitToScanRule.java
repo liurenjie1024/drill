@@ -19,6 +19,7 @@
 package io.github.zeus.rule;
 
 import io.github.zeus.ZeusGroupScan;
+import io.github.zeus.rel.ZeusLimitNode;
 import io.github.zeus.rpc.LimitNode;
 import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
@@ -27,8 +28,6 @@ import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.drill.exec.planner.logical.DrillLimitRel;
 import org.apache.drill.exec.planner.logical.DrillScanRel;
-import org.apache.drill.exec.planner.physical.LimitPrel;
-import org.apache.drill.exec.planner.physical.ScanPrel;
 
 public class PushLimitToScanRule extends RelOptRule {
   static final PushLimitToScanRule SINGLETON = new PushLimitToScanRule();
@@ -47,14 +46,11 @@ public class PushLimitToScanRule extends RelOptRule {
     LimitNode limitNode = LimitNode.newBuilder()
         .setLimit(limit)
         .build();
-    PlanNode planNode = PlanNode.newBuilder()
-        .setPlanNodeType(PlanNodeType.LIMIT_NODE)
-        .setLimitNode(limitNode)
-        .build();
 
     ZeusGroupScan groupScan = (ZeusGroupScan) scanRel.getGroupScan();
 
-    ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootPlanNode(planNode);
+    ZeusLimitNode newRoot = new ZeusLimitNode(groupScan.getRootRelNode(), limitNode);
+    ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot);
 
     DrillScanRel newScan = new DrillScanRel(
       scanRel.getCluster(),
