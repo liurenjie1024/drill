@@ -1,0 +1,190 @@
+{
+  "planId": "",
+  "root": {
+    "nodeId": 0,
+    "children": [
+      {
+        "nodeId": 0,
+        "children": [
+          {
+            "nodeId": 0,
+            "children": [
+              {
+                "nodeId": 0,
+                "children": [],
+                "planNodeType": "SCAN_NODE",
+                "scanNode": {
+                  "dbId": 1,
+                  "tableId": 1,
+                  "columns": [
+                    1,
+                    15,
+                    22,
+                    27
+                  ],
+                  "filters": [
+                    {
+                      "expressionType": "SCALAR_FUNCTION",
+                      "scalarFunc": {
+                        "funcId": "GT_INT32",
+                        "children": [
+                          {
+                            "expressionType": "COLUMN_REF",
+                            "column": {
+                              "name": "advertiserId"
+                            },
+                            "alias": "advertiserId",
+                            "fieldType": "INT32"
+                          },
+                          {
+                            "expressionType": "LITERAL",
+                            "literal": {
+                              "value": {
+                                "stringValue": "",
+                                "floatValue": 0.0,
+                                "i32Value": 100,
+                                "i64Value": "0",
+                                "boolValue": false,
+                                "doubleValue": 0.0
+                              }
+                            },
+                            "alias": "",
+                            "fieldType": "INT32"
+                          }
+                        ]
+                      },
+                      "alias": "",
+                      "fieldType": "BOOL"
+                    }
+                  ]
+                }
+              }
+            ],
+            "planNodeType": "FILTER_NODE",
+            "filterNode": {
+              "conditions": [
+                {
+                  "expressionType": "SCALAR_FUNCTION",
+                  "scalarFunc": {
+                    "funcId": "GT_INT32",
+                    "children": [
+                      {
+                        "expressionType": "COLUMN_REF",
+                        "column": {
+                          "name": "advertiserId"
+                        },
+                        "alias": "advertiserId",
+                        "fieldType": "INT32"
+                      },
+                      {
+                        "expressionType": "LITERAL",
+                        "literal": {
+                          "value": {
+                            "stringValue": "",
+                            "floatValue": 0.0,
+                            "i32Value": 100,
+                            "i64Value": "0",
+                            "boolValue": false,
+                            "doubleValue": 0.0
+                          }
+                        },
+                        "alias": "",
+                        "fieldType": "INT32"
+                      }
+                    ]
+                  },
+                  "alias": "",
+                  "fieldType": "BOOL"
+                }
+              ]
+            }
+          }
+        ],
+        "planNodeType": "PROJECT_NODE",
+        "projectNode": {
+          "items": [
+            {
+              "expression": {
+                "expressionType": "SCALAR_FUNCTION",
+                "scalarFunc": {
+                  "funcId": "ADD_INT64",
+                  "children": [
+                    {
+                      "expressionType": "COLUMN_REF",
+                      "column": {
+                        "name": "realFee"
+                      },
+                      "alias": "realFee",
+                      "fieldType": "INT64"
+                    },
+                    {
+                      "expressionType": "COLUMN_REF",
+                      "column": {
+                        "name": "fee"
+                      },
+                      "alias": "fee",
+                      "fieldType": "INT64"
+                    }
+                  ]
+                },
+                "alias": "EXPR$0",
+                "fieldType": "INT64"
+              },
+              "alias": "EXPR$0"
+            },
+            {
+              "expression": {
+                "expressionType": "COLUMN_REF",
+                "column": {
+                  "name": "timestamp"
+                },
+                "alias": "timestamp",
+                "fieldType": "INT64"
+              },
+              "alias": "timestamp"
+            },
+            {
+              "expression": {
+                "expressionType": "COLUMN_REF",
+                "column": {
+                  "name": "advertiserId"
+                },
+                "alias": "advertiserId",
+                "fieldType": "INT32"
+              },
+              "alias": "advertiserId"
+            }
+          ]
+        }
+      }
+    ],
+    "planNodeType": "TOPN_NODE",
+    "topnNode": {
+      "sortItem": [
+        {
+          "expr": {
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "timestamp"
+            },
+            "alias": "timestamp",
+            "fieldType": "INT64"
+          },
+          "desc": false
+        },
+        {
+          "expr": {
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "advertiserId"
+            },
+            "alias": "advertiserId",
+            "fieldType": "INT32"
+          },
+          "desc": false
+        }
+      ],
+      "limit": 3
+    }
+  }
+}

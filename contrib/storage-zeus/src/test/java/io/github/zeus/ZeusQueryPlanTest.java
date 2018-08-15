@@ -22,11 +22,28 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 @Category({ZeusStorageTest.class})
-public class ZeusQueryTest extends ZeusTestBase {
+public class ZeusQueryPlanTest extends ZeusTestBase {
+  @Test
+  public void testSelectAllWithFilterPlan() throws Exception {
+    verifyZeusPlanForSql("select * from logs.realtimelog where `timestamp` > 10000 and `timestamp` <= 20000",
+      "select_with_filter_plan.json");
+  }
 
   @Test
-  public void testSelectAllPlan() throws Exception {
-    verifyZeusPlanForSql("select * from logs.realtimelog where `timestamp` >= 10000 AND `timestamp`< 20000",
-      "select_with_filter_plan.json");
+  public void testProjectWithAliasPlan() throws Exception {
+    verifyZeusPlanForSql("select (fee+realFee) as money, advertiserId as advId from logs.realtimelog",
+      "project_with_alias_plan.json");
+  }
+
+  @Test
+  public void testPushTopNPlan() throws Exception {
+    verifyZeusPlanForSql(
+      "select realFee + fee, `timestamp` " +
+        "from logs.realtimelog " +
+        "where advertiserId > 100 " +
+        "order by `timestamp`, advertiserId " +
+        "limit 3",
+      "push_topn_plan.json"
+    );
   }
 }

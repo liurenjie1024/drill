@@ -21,6 +21,7 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
+import io.github.zeus.rel.ZeusTopNNode;
 import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
@@ -58,21 +59,24 @@ public class PushTopNToScanRule extends RelOptRule {
 
     ZeusGroupScan zeusGroupScan = (ZeusGroupScan) scanDrel.getGroupScan();
 
-    Optional<PlanNode> topNNode = topnNodeToPlanNode(limitDrel, sortDrel, call, zeusGroupScan.getTable(), scanDrel);
+    Optional<TopNNode> topNNode = toTopNNode(limitDrel, sortDrel, zeusGroupScan.getTable(),
+      scanDrel);
 
     if (topNNode.isPresent()) {
-      ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(topNNode.get());
-      newGroupScan.setTopNPushedDown(true);
+      ZeusTopNNode newRoot = new ZeusTopNNode(zeusGroupScan.getRootRelNode(), topNNode.get());
+      ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot)
+        .setRulePushedDown(PushedDownRule.TOPN);
 
       DrillScanRel newScanDrel = new DrillScanRel(scanDrel.getCluster(),
-          scanDrel.getTraitSet(), scanDrel.getTable(), newGroupScan, scanDrel.getRowType(),
+          limitDrel.getTraitSet(), scanDrel.getTable(), newGroupScan, scanDrel.getRowType(),
           scanDrel.getColumns());
 
-      RelNode newSortDrel = sortDrel.copy(sortDrel.getTraitSet(), ImmutableList.of(newScanDrel));
-      call.transformTo(limitDrel.copy(limitDrel.getTraitSet(), ImmutableList.of(newSortDrel)));
+//      RelNode newSortDrel = sortDrel.copy(sortDrel.getTraitSet(), ImmutableList.of(newScanDrel));
+//      call.transformTo(limitDrel.copy(limitDrel.getTraitSet(), ImmutableList.of(newSortDrel)));
+      call.transformTo(newScanDrel);
     } else {
-      ZeusGroupScan newGroupScan = zeusGroupScan.copy();
-      newGroupScan.setTopNPushedDown(true);
+      ZeusGroupScan newGroupScan = zeusGroupScan.copy()
+        .setRulePushedDown(PushedDownRule.TOPN);
 
       DrillScanRel newScanDrel = new DrillScanRel(scanDrel.getCluster(),
           scanDrel.getTraitSet(), scanDrel.getTable(), newGroupScan, scanDrel.getRowType(),
@@ -93,7 +97,7 @@ public class PushTopNToScanRule extends RelOptRule {
     }
 
     ZeusGroupScan zeusGroupScan = (ZeusGroupScan) groupScan;
-    if (zeusGroupScan.isTopNPushedDown()) {
+    if (zeusGroupScan.isRulePushedDown(PushedDownRule.TOPN)) {
       return false;
     }
 
@@ -105,7 +109,10 @@ public class PushTopNToScanRule extends RelOptRule {
     return super.matches(call);
   }
 
-  private static Optional<PlanNode> topnNodeToPlanNode(DrillLimitRel limitRel, DrillSortRel sortRel, RelOptRuleCall call, ZeusTable table, RelNode input) {
+  private static Optional<TopNNode> toTopNNode(DrillLimitRel limitRel,
+                                               DrillSortRel sortRel,
+                                               ZeusTable table,
+                                               RelNode input) {
     List<Ordering> orderBys = PrelUtil.getOrdering(sortRel.getCollation(), input.getRowType());
 
     List<SortItem> sortItems = new ArrayList<>(orderBys.size());
@@ -133,12 +140,7 @@ public class PushTopNToScanRule extends RelOptRule {
           .addAllSortItem(sortItems)
           .build();
 
-      PlanNode newRoot = PlanNode.newBuilder()
-          .setPlanNodeType(PlanNodeType.TOPN_NODE)
-          .setTopnNode(topNNode)
-          .build();
-
-      return Optional.of(newRoot);
+      return Optional.of(topNNode);
     } else {
       return Optional.empty();
     }

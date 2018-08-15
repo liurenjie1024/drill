@@ -73,7 +73,7 @@ public class ZeusDB extends AbstractSchema {
         .map(schema -> new ZeusTable(plugin, storageEngineName, schema.getName(), this, schema));
   }
 
-  public QueryPlan getTableScanQueryPlan(int tableId, List<SchemaPath> columns) {
+  public ScanNode getTableScanQueryPlan(int tableId, List<SchemaPath> columns) {
     boolean isStarQuery = isStarSchema(columns);
 
     if (isStarQuery) {
@@ -94,13 +94,13 @@ public class ZeusDB extends AbstractSchema {
         .findFirst();
   }
 
-  private QueryPlan buildTableScanPlan(int tableId, List<String> columnNames, boolean isStarQuery) {
+  private ScanNode buildTableScanPlan(int tableId, List<String> columnNames, boolean isStarQuery) {
     return Optional.ofNullable(dbSchema.getTablesMap().get(tableId))
         .map(t -> buildTableScanNode(t, columnNames, isStarQuery))
         .orElseThrow(() -> CatalogNotFoundException.tableIdNotFound(dbSchema.getId(), tableId));
   }
 
-  private QueryPlan buildTableScanNode(ZeusTableSchema tableSchema, List<String> columnNames, boolean isStarQuery) {
+  private ScanNode buildTableScanNode(ZeusTableSchema tableSchema, List<String> columnNames, boolean isStarQuery) {
     Collection<Integer> columnIds;
 
     if (isStarQuery) {
@@ -123,22 +123,10 @@ public class ZeusDB extends AbstractSchema {
           .collect(Collectors.toList());
     }
 
-
-
-    ScanNode scanNode = ScanNode.newBuilder()
+    return ScanNode.newBuilder()
         .setDbId(dbSchema.getId())
         .setTableId(tableSchema.getId())
         .addAllColumns(columnIds)
-        .build();
-
-    PlanNode planNode = PlanNode.newBuilder()
-        .setPlanNodeType(PlanNodeType.SCAN_NODE)
-        .setScanNode(scanNode)
-        .build();
-
-    return QueryPlan.newBuilder()
-        .setPlanId(UUID.randomUUID().toString())
-        .setRoot(planNode)
         .build();
   }
 

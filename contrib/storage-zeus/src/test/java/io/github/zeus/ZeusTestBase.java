@@ -104,7 +104,7 @@ public class ZeusTestBase extends PlanTestBase {
 
     ObjectMapper mapper = new ObjectMapper();
     JsonNode rootNode = mapper.readTree(physicalPlan);
-    JsonNode jsonPlan = rootNode.at("/graph/0/plan/jsonPlan");
+    JsonNode jsonPlan = rootNode.at("/graph/0/queryPlan/jsonPlan");
 
     QueryPlan.Builder queryPlanBuilder  = QueryPlan.newBuilder();
     JsonFormat.parser().merge(jsonPlan.textValue(), queryPlanBuilder);

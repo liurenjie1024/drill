@@ -20,6 +20,7 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
+import io.github.zeus.rel.ZeusProjectNode;
 import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
@@ -90,13 +91,9 @@ public class PushProjectToScanRule extends RelOptRule {
         .addAllItems(projects)
         .build();
 
-      PlanNode newRoot = PlanNode.newBuilder()
-        .setPlanNodeType(PlanNodeType.PROJECT_NODE)
-        .setProjectNode(projectNode)
-        .build();
-
-      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot);
-      newGroupScan.setProjectPushedDown(true);
+      ZeusProjectNode newRoot = new ZeusProjectNode(groupScan.getRootRelNode(), projectNode);
+      ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot)
+        .setRulePushedDown(PushedDownRule.PROJECT);
 
       DrillScanRel newScan = new DrillScanRel(
         scanRel.getCluster(),
@@ -109,8 +106,8 @@ public class PushProjectToScanRule extends RelOptRule {
 
       call.transformTo(newScan);
     } else {
-      ZeusGroupScan newGroupScan = groupScan.copy();
-      newGroupScan.setFilterPushedDown(true);
+      ZeusGroupScan newGroupScan = groupScan.copy()
+        .setRulePushedDown(PushedDownRule.PROJECT);
 
       DrillScanRel newScan = new DrillScanRel(
         scanRel.getCluster(),
@@ -137,7 +134,7 @@ public class PushProjectToScanRule extends RelOptRule {
     }
 
     ZeusGroupScan zeusGroupScan = (ZeusGroupScan) groupScan;
-    if (zeusGroupScan.isProjectPushedDown()) {
+    if (zeusGroupScan.isRulePushedDown(PushedDownRule.PROJECT)) {
       return false;
     }
 

@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.BitSet;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.drill.exec.physical.base.ScanStats.GroupScanProperty.EXACT_ROW_COUNT;
 
@@ -103,7 +104,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
     this.config = config;
     this.plugin = plugin;
     this.rootRelNode = rootNode;
-    this.pushedDownRules = pushedDownRules;
+    this.pushedDownRules = BitSet.valueOf(pushedDownRules.toByteArray());
   }
 
 

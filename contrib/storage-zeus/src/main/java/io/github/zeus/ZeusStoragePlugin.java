@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.zeus.client.ZeusClient;
+import io.github.zeus.rel.ZeusScanNode;
 import io.github.zeus.rule.Rules;
 import io.github.zeus.schema.ZeusDB;
 import org.apache.calcite.plan.RelOptRule;
@@ -118,7 +119,7 @@ public class ZeusStoragePlugin extends AbstractStoragePlugin {
         new TypeReference<Integer>() {});
     return new ZeusGroupScan(
         tableId,
-        ZeusQueryPlan.from(dbSchema.getTableScanQueryPlan(tableId, paths)),
+        new ZeusScanNode(1, dbSchema.getTableScanQueryPlan(tableId, paths)),
         config,
         this);
   }

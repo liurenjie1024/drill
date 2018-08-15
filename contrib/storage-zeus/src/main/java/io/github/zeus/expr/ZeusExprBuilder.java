@@ -57,11 +57,9 @@ import java.util.Optional;
 public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, Void, RuntimeException> {
   private static final Logger LOG = LoggerFactory.getLogger(ZeusExprBuilder.class);
   private final ZeusTable table;
-  private int nextID;
 
   public ZeusExprBuilder(ZeusTable table) {
     this.table = table;
-    this.nextID = 0;
   }
 
   @Override
@@ -102,7 +100,6 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
           .setExpressionType(ExpressionType.SCALAR_FUNCTION)
           .setScalarFunc(scalarFunction)
           .setFieldType(zeusFunction.get().getReturnType())
-          .setAlias(nextAnonymousName())
           .build()
         );
       } else if (aggFuncIdOpt.isPresent()) {
@@ -115,7 +112,6 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
           .setExpressionType(ExpressionType.AGG_FUNCTION)
           .setAggFunc(aggFunction)
           .setFieldType(zeusFunction.get().getReturnType())
-          .setAlias(nextAnonymousName())
           .build()
         );
       }
@@ -210,11 +206,6 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
     return Optional.of(createLiteralExpression(columnValue, ColumnType.STRING));
   }
 
-  private String nextAnonymousName() {
-    nextID += 1;
-    return "$_" + nextID;
-  }
-
   @Override
   public Optional<Expression> visitBooleanOperator(BooleanOperator call, Void value) {
     do {
@@ -256,7 +247,6 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
           .setExpressionType(ExpressionType.SCALAR_FUNCTION)
           .setScalarFunc(scalarFunction)
           .setFieldType(ColumnType.BOOL)
-          .setAlias(nextAnonymousName())
           .build());
     } while(false);
 

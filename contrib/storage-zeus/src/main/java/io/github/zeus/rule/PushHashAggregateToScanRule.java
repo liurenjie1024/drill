@@ -22,10 +22,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
+import io.github.zeus.rel.ZeusHashAggNode;
 import io.github.zeus.rpc.AggregationNode;
 import io.github.zeus.rpc.Expression;
-import io.github.zeus.rpc.PlanNode;
-import io.github.zeus.rpc.PlanNodeType;
 import io.github.zeus.schema.ZeusTable;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
@@ -53,14 +52,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PushAggregateToScanRule extends AggPruleBase {
-  public static final PushAggregateToScanRule SINGLETON = new PushAggregateToScanRule();
+public class PushHashAggregateToScanRule extends AggPruleBase {
+  public static final PushHashAggregateToScanRule SINGLETON = new PushHashAggregateToScanRule();
 
-  private static final Logger LOG = LoggerFactory.getLogger(PushAggregateToScanRule.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PushHashAggregateToScanRule.class);
 
-  private PushAggregateToScanRule() {
+  private PushHashAggregateToScanRule() {
     super(RelOptHelper.some(DrillAggregateRel.class, RelOptHelper.any(DrillScanRel.class)),
-      "PushAggregateToScanRule");
+      "PushHashAggregateToScanRule");
   }
 
   @Override
@@ -72,11 +71,6 @@ public class PushAggregateToScanRule extends AggPruleBase {
     final DrillAggregateRel aggregate = call.rel(0);
     final DrillScanRel scan = call.rel(1);
 
-    if (aggregate.containsDistinctCall() || aggregate.getGroupCount() == 0) {
-      // currently, don't use HashAggregate if any of the logical aggrs contains DISTINCT or
-      // if there are no grouping keys
-      return;
-    }
 
     DrillDistributionTrait distOnAllKeys =
         new DrillDistributionTrait(DrillDistributionTrait.DistributionType.HASH_DISTRIBUTED,
@@ -172,14 +166,10 @@ public class PushAggregateToScanRule extends AggPruleBase {
         .addAllAggFunc(aggs)
         .build();
 
-    PlanNode newRoot = PlanNode.newBuilder()
-        .setAggNode(aggNode)
-        .setPlanNodeType(PlanNodeType.AGGREGATE_NODE)
-        .build();
+    ZeusHashAggNode newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode);
 
-    ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot);
-    newGroupScan.setRowCount(5);
-    newGroupScan.setAggPushedDown(true);
+    ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot)
+      .setRulePushedDown(PushedDownRule.AGG);
 
     ScanPrel newScan = ScanPrel.create(scanPrel,
         hashAggPrel.getTraitSet(), newGroupScan, hashAggPrel.getRowType());
@@ -190,17 +180,19 @@ public class PushAggregateToScanRule extends AggPruleBase {
 
   @Override
   public boolean matches(RelOptRuleCall call) {
-     DrillScanRel scanRel = call.rel(1);
+    final DrillAggregateRel aggregate = call.rel(0);
+    final DrillScanRel scanRel = call.rel(1);
 
     GroupScan groupScan = scanRel.getGroupScan();
     if (!(groupScan instanceof ZeusGroupScan)) {
       return false;
     }
 
-//    ZeusGroupScan zeusGroupScan = (ZeusGroupScan) groupScan;
-//    if (zeusGroupScan.isAggPushedDown()) {
-//      return false;
-//    }
+    if (aggregate.containsDistinctCall() || aggregate.getGroupCount() == 0) {
+      // currently, don't use HashAggregate if any of the logical aggrs contains DISTINCT or
+      // if there are no grouping keys
+      return false;
+    }
 
     return super.matches(call);
   }

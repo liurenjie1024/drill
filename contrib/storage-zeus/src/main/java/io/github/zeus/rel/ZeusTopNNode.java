@@ -25,7 +25,7 @@ public class ZeusTopNNode extends ZeusSingleRelNode {
   @Override
   public ScanStats getScanStats() {
     ScanStats inputScanStats = getInput().getScanStats();
-    return new ScanStats(ScanStats.GroupScanProperty.NO_EXACT_ROW_COUNT,
+    return new ScanStats(ScanStats.GroupScanProperty.EXACT_ROW_COUNT,
       topNNode.getLimit(),
       inputScanStats.getCpuCost(),
       inputScanStats.getDiskCost());
