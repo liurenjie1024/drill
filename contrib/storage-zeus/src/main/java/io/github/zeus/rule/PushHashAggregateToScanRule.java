@@ -24,7 +24,11 @@ import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
 import io.github.zeus.rel.ZeusHashAggNode;
 import io.github.zeus.rpc.AggregationNode;
+import io.github.zeus.rpc.ColumnType;
+import io.github.zeus.rpc.ColumnValue;
 import io.github.zeus.rpc.Expression;
+import io.github.zeus.rpc.ExpressionType;
+import io.github.zeus.rpc.LiteralExpression;
 import io.github.zeus.schema.ZeusTable;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
@@ -123,7 +127,7 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
     }
   }
 
-  private static ScanPrel pushAggToScan(HashAggPrel hashAggPrel, DrillScanRel scanPrel) {
+  protected static ScanPrel pushAggToScan(HashAggPrel hashAggPrel, DrillScanRel scanPrel) {
     ZeusGroupScan zeusGroupScan = (ZeusGroupScan) scanPrel.getGroupScan();
     ZeusTable table = zeusGroupScan.getTable();
 
@@ -141,6 +145,28 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
 
     if (!allConverted) {
       return null;
+    }
+
+    boolean zeroGroupBy = false;
+    // If group bys is zero, we add an literal expression
+    if (groupBys.size() == 0) {
+      ColumnValue columnValue = ColumnValue.newBuilder()
+        .setI32Value(1)
+        .build();
+
+      LiteralExpression literalExpression = LiteralExpression.newBuilder()
+        .setValue(columnValue)
+        .build();
+
+      Expression expression = Expression.newBuilder()
+        .setExpressionType(ExpressionType.LITERAL)
+        .setLiteral(literalExpression)
+        .setAlias("__$auto_gen_fake$__")
+        .setFieldType(ColumnType.INT32)
+        .build();
+
+      groupBys.add(expression);
+      zeroGroupBy = true;
     }
 
     List<Expression> aggs = new ArrayList<>(hashAggPrel.getAggExprs().size());
@@ -166,7 +192,12 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
         .addAllAggFunc(aggs)
         .build();
 
-    ZeusHashAggNode newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode);
+    ZeusHashAggNode newRoot;
+    if (zeroGroupBy)  {
+      newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode, 1);
+    } else {
+      newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode);
+    }
 
     ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot)
       .setRulePushedDown(PushedDownRule.AGG);

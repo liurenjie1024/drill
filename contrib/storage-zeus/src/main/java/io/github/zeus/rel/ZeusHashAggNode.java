@@ -6,11 +6,17 @@ import io.github.zeus.rpc.PlanNodeType;
 import org.apache.drill.exec.physical.base.ScanStats;
 
 public class ZeusHashAggNode extends ZeusSingleRelNode {
+  private final long rowCount;
   private final AggregationNode aggNode;
 
   public ZeusHashAggNode(ZeusRelNode input, AggregationNode aggNode) {
+    this(input, aggNode, -1);
+  }
+
+  public ZeusHashAggNode(ZeusRelNode input, AggregationNode aggNode, long rowCount) {
     super(input);
     this.aggNode = aggNode;
+    this.rowCount = rowCount;
   }
 
   @Override
@@ -25,9 +31,13 @@ public class ZeusHashAggNode extends ZeusSingleRelNode {
   @Override
   public ScanStats getScanStats() {
     ScanStats inputScanStats = getInput().getScanStats();
-    double ratio = 1 - Math.pow(0.5, aggNode.getGroupByCount());
+    long rowCount = this.rowCount;
+    if (rowCount < 0 ){
+      double ratio = 1 - Math.pow(0.5, aggNode.getGroupByCount());
+      rowCount = (long)(inputScanStats.getRecordCount() * ratio);
+    }
     return new ScanStats(ScanStats.GroupScanProperty.NO_EXACT_ROW_COUNT,
-      (long)(inputScanStats.getRecordCount() * ratio),
+      rowCount,
       inputScanStats.getCpuCost(),
       inputScanStats.getDiskCost());
   }

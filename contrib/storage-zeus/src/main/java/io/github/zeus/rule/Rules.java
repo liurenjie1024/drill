@@ -25,7 +25,8 @@ import java.util.Set;
 
 public class Rules {
   public static Set<RelOptRule> PHYSICAL_RULES = Sets.newHashSet(
-    PushHashAggregateToScanRule.SINGLETON
+    PushHashAggregateToScanRule.SINGLETON,
+    PushZeroGroupByAggToScanRule.SINGLETON
   );
 
   public static Set<RelOptRule> LOGICAL_RULES = Sets.newHashSet(

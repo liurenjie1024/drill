@@ -1,0 +1,89 @@
+{
+  "planId": "",
+  "root": {
+    "nodeId": 0,
+    "children": [{
+      "nodeId": 0,
+      "children": [],
+      "planNodeType": "SCAN_NODE",
+      "scanNode": {
+        "dbId": 1,
+        "tableId": 1,
+        "columns": [15, 27, 17],
+        "filters": []
+      }
+    }],
+    "planNodeType": "AGGREGATE_NODE",
+    "aggNode": {
+      "groupBy": [{
+        "expressionType": "COLUMN_REF",
+        "column": {
+          "name": "advertiserId"
+        },
+        "alias": "advertiserId",
+        "fieldType": "INT32"
+      }],
+      "aggFunc": [{
+        "expressionType": "AGG_FUNCTION",
+        "aggFunc": {
+          "funcId": "MIN_INT64",
+          "children": [{
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "fee"
+            },
+            "alias": "fee",
+            "fieldType": "INT64"
+          }]
+        },
+        "alias": "minFee",
+        "fieldType": "INT64"
+      }, {
+        "expressionType": "AGG_FUNCTION",
+        "aggFunc": {
+          "funcId": "MAX_INT64",
+          "children": [{
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "realFee"
+            },
+            "alias": "realFee",
+            "fieldType": "INT64"
+          }]
+        },
+        "alias": "maxRealFee",
+        "fieldType": "INT64"
+      }, {
+        "expressionType": "AGG_FUNCTION",
+        "aggFunc": {
+          "funcId": "SUM_INT64",
+          "children": [{
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "numOfShow"
+            },
+            "alias": "numOfShow",
+            "fieldType": "INT64"
+          }]
+        },
+        "alias": "showSum",
+        "fieldType": "INT64"
+      }, {
+        "expressionType": "AGG_FUNCTION",
+        "aggFunc": {
+          "funcId": "SUM_INT64",
+          "children": [{
+            "expressionType": "COLUMN_REF",
+            "column": {
+              "name": "numOfClick"
+            },
+            "alias": "numOfClick",
+            "fieldType": "INT64"
+          }]
+        },
+        "alias": "$f4",
+        "fieldType": "INT64"
+      }]
+    }
+  }
+}

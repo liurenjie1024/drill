@@ -63,11 +63,11 @@ public class AggFunctions {
     ColumnType.STRING, "min", ColumnType.STRING);
 
   public static final ZeusFunctionEntry SUM_INT32 = ZeusFunctionEntry.from(AggFuncId.SUM_INT32,
-    ColumnType.INT32,"sum", ColumnType.INT32);
+    ColumnType.INT32,"$sum0", ColumnType.INT32);
   public static final ZeusFunctionEntry SUM_INT64 = ZeusFunctionEntry.from(AggFuncId.SUM_INT64,
-    ColumnType.INT64,"sum", ColumnType.INT64);
+    ColumnType.INT64,"$sum0", ColumnType.INT64);
   public static final ZeusFunctionEntry SUM_FLOAT4 = ZeusFunctionEntry.from(AggFuncId.SUM_FLOAT4,
-    ColumnType.FLOAT4,"sum", ColumnType.FLOAT4);
+    ColumnType.FLOAT4,"$sum0", ColumnType.FLOAT4);
   public static final ZeusFunctionEntry SUM_FLOAT8 = ZeusFunctionEntry.from(AggFuncId.SUM_FLOAT8,
-    ColumnType.FLOAT8, "sum", ColumnType.FLOAT8);
+    ColumnType.FLOAT8, "$sum0", ColumnType.FLOAT8);
 }

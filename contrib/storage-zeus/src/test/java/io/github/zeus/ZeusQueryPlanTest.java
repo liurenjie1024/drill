@@ -46,4 +46,17 @@ public class ZeusQueryPlanTest extends ZeusTestBase {
       "push_topn_plan.json"
     );
   }
+
+  @Test
+  public void testPushHashAggregationPlan() throws Exception {
+    verifyZeusPlanForSql(
+      "select " +
+        "min(fee) as minFee, " +
+        "max(realFee) as maxRealFee, " +
+        "sum(numOfShow) as showSum " +
+        "from logs.realtimelog ",
+
+      "push_zero_group_by_hash_agg_plan.json"
+    );
+  }
 }
