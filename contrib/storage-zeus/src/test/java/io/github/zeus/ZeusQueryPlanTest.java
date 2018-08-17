@@ -48,7 +48,7 @@ public class ZeusQueryPlanTest extends ZeusTestBase {
   }
 
   @Test
-  public void testPushHashAggregationPlan() throws Exception {
+  public void testPushZeroGroupByAggPlan() throws Exception {
     verifyZeusPlanForSql(
       "select " +
         "min(fee) as minFee, " +
@@ -57,6 +57,29 @@ public class ZeusQueryPlanTest extends ZeusTestBase {
         "from logs.realtimelog ",
 
       "push_zero_group_by_hash_agg_plan.json"
+    );
+  }
+
+  @Test
+  public void testPushHashAggregationPlan() throws Exception {
+    verifyZeusPlanForSql(
+      "select advertiserId, " +
+        "min(fee) as minFee, " +
+        "max(realFee) as maxRealFee, " +
+        "sum(numOfShow) as showSum " +
+        "from logs.realtimelog " +
+        "group by advertiserId " +
+        "having sum(numOfClick) > 0",
+
+      "push_hash_agg_plan.json"
+    );
+  }
+
+  @Test
+  public void testPushCountToScanPlan() throws Exception {
+    verifyZeusPlanForSql(
+      "select count(*) as cnt from logs.realtimelog",
+      "push_count_plan.json"
     );
   }
 }

@@ -20,10 +20,8 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
-import io.github.zeus.rel.ZeusProjectNode;
+import io.github.zeus.rel.ZeusProjectRel;
 import io.github.zeus.rpc.Expression;
-import io.github.zeus.rpc.PlanNode;
-import io.github.zeus.rpc.PlanNodeType;
 import io.github.zeus.rpc.ProjectNode;
 import io.github.zeus.rpc.ProjectNode.ProjectItem;
 import org.apache.calcite.plan.RelOptRule;
@@ -66,7 +64,7 @@ public class PushProjectToScanRule extends RelOptRule {
         scanRel, namedProject.left);
 
       Optional<Expression> zeusExprOpt = logicalExpr.accept(
-        new ZeusExprBuilder(groupScan.getTable()),
+        new ZeusExprBuilder(scanRel),
         null);
 
       if (!zeusExprOpt.isPresent()) {
@@ -91,7 +89,7 @@ public class PushProjectToScanRule extends RelOptRule {
         .addAllItems(projects)
         .build();
 
-      ZeusProjectNode newRoot = new ZeusProjectNode(groupScan.getRootRelNode(), projectNode);
+      ZeusProjectRel newRoot = new ZeusProjectRel(groupScan.getRootRelNode(), projectNode);
       ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot)
         .setRulePushedDown(PushedDownRule.PROJECT);
 

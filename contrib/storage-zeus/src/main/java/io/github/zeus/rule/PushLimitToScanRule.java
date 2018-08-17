@@ -19,10 +19,8 @@
 package io.github.zeus.rule;
 
 import io.github.zeus.ZeusGroupScan;
-import io.github.zeus.rel.ZeusLimitNode;
+import io.github.zeus.rel.ZeusLimitRel;
 import io.github.zeus.rpc.LimitNode;
-import io.github.zeus.rpc.PlanNode;
-import io.github.zeus.rpc.PlanNodeType;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.rex.RexLiteral;
@@ -49,7 +47,7 @@ public class PushLimitToScanRule extends RelOptRule {
 
     ZeusGroupScan groupScan = (ZeusGroupScan) scanRel.getGroupScan();
 
-    ZeusLimitNode newRoot = new ZeusLimitNode(groupScan.getRootRelNode(), limitNode);
+    ZeusLimitRel newRoot = new ZeusLimitRel(groupScan.getRootRelNode(), limitNode);
     ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot);
 
     DrillScanRel newScan = new DrillScanRel(

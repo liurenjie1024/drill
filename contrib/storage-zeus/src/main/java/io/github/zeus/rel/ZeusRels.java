@@ -5,8 +5,8 @@ import io.github.zeus.rpc.QueryPlan;
 
 import java.util.UUID;
 
-public class ZeusRelNodes {
-  public static ZeusQueryPlan toQueryPlan(ZeusRelNode root) {
+public class ZeusRels {
+  public static ZeusQueryPlan toQueryPlan(ZeusRel root) {
     QueryPlan queryPlan = QueryPlan.newBuilder()
       .setPlanId(UUID.randomUUID().toString())
       .setRoot(root.toPlanNode())

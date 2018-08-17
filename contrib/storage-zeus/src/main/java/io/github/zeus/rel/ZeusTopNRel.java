@@ -5,10 +5,10 @@ import io.github.zeus.rpc.PlanNodeType;
 import io.github.zeus.rpc.TopNNode;
 import org.apache.drill.exec.physical.base.ScanStats;
 
-public class ZeusTopNNode extends ZeusSingleRelNode {
+public class ZeusTopNRel extends ZeusAbstractSingleRel {
   private final TopNNode topNNode;
 
-  public ZeusTopNNode(ZeusRelNode input, TopNNode topNNode) {
+  public ZeusTopNRel(ZeusRel input, TopNNode topNNode) {
     super(input);
     this.topNNode = topNNode;
   }
@@ -30,4 +30,6 @@ public class ZeusTopNNode extends ZeusSingleRelNode {
       inputScanStats.getCpuCost(),
       inputScanStats.getDiskCost());
   }
+
+
 }

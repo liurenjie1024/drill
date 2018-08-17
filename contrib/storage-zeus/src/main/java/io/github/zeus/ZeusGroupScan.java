@@ -24,11 +24,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.github.zeus.client.exception.CatalogNotFoundException;
-import io.github.zeus.rel.ZeusRelNode;
-import io.github.zeus.rel.ZeusRelNodes;
-import io.github.zeus.rel.ZeusScanNode;
-import io.github.zeus.rel.ZeusSingleRelNode;
-import io.github.zeus.rpc.PlanNode;
+import io.github.zeus.rel.ZeusRel;
+import io.github.zeus.rel.ZeusRels;
+import io.github.zeus.rel.ZeusScanRel;
 import io.github.zeus.rule.PushedDownRule;
 import io.github.zeus.schema.ZeusTable;
 import org.apache.drill.common.exceptions.ExecutionSetupException;
@@ -46,9 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.BitSet;
 import java.util.List;
-import java.util.Objects;
-
-import static org.apache.drill.exec.physical.base.ScanStats.GroupScanProperty.EXACT_ROW_COUNT;
 
 @JsonTypeName("zeus-scan")
 public class ZeusGroupScan extends AbstractGroupScan {
@@ -56,7 +51,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
 
   private final int tableId;
   private final ZeusQueryPlan queryPlan;
-  private final ZeusRelNode rootRelNode;
+  private final ZeusRel rootRelNode;
   private final ZeusStoragePluginConfig config;
   private final ZeusStoragePlugin plugin;
   private final BitSet pushedDownRules;
@@ -74,19 +69,19 @@ public class ZeusGroupScan extends AbstractGroupScan {
 
   public ZeusGroupScan(
     int tableId,
-    ZeusRelNode rootRelNode,
+    ZeusRel rootRelNode,
     ZeusStoragePluginConfig config,
     ZeusStoragePlugin plugin) {
-    this(tableId, ZeusRelNodes.toQueryPlan(rootRelNode), rootRelNode, config, plugin, new BitSet());
+    this(tableId, ZeusRels.toQueryPlan(rootRelNode), rootRelNode, config, plugin, new BitSet());
   }
 
   public ZeusGroupScan(
     int tableId,
-    ZeusRelNode rootRelNode,
+    ZeusRel rootRelNode,
     ZeusStoragePluginConfig config,
     ZeusStoragePlugin plugin,
     BitSet pushedDownRules) {
-    this(tableId, ZeusRelNodes.toQueryPlan(rootRelNode), rootRelNode, config, plugin,
+    this(tableId, ZeusRels.toQueryPlan(rootRelNode), rootRelNode, config, plugin,
       pushedDownRules);
   }
 
@@ -94,7 +89,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
   private ZeusGroupScan(
       int tableId,
       ZeusQueryPlan queryPlan,
-      ZeusRelNode rootNode,
+      ZeusRel rootNode,
       ZeusStoragePluginConfig config,
       ZeusStoragePlugin plugin,
       BitSet pushedDownRules) {
@@ -148,7 +143,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
 
   @Override
   public ZeusGroupScan clone(List<SchemaPath> columns) {
-    ZeusScanNode zeusScanNode = (ZeusScanNode) rootRelNode;
+    ZeusScanRel zeusScanRel = (ZeusScanRel) rootRelNode;
 
     List<Integer> columnIds = plugin.getDbSchema()
       .getTable(tableId)
@@ -156,7 +151,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
       .orElseThrow(() -> CatalogNotFoundException.tableIdNotFound(plugin.getDbSchema()
         .getId(), tableId));
 
-    ZeusRelNode newRoot = zeusScanNode.cloneWithColumnIds(columnIds);
+    ZeusRel newRoot = zeusScanRel.cloneWithColumnIds(columnIds);
 
     return new ZeusGroupScan(tableId, newRoot, config, plugin, pushedDownRules);
   }
@@ -166,7 +161,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
     return true;
   }
 
-  public ZeusGroupScan cloneWithNewRootRelNode(ZeusRelNode newRoot) {
+  public ZeusGroupScan cloneWithNewRootRelNode(ZeusRel newRoot) {
     return new ZeusGroupScan(tableId, newRoot, config, plugin, pushedDownRules);
   }
 
@@ -196,7 +191,7 @@ public class ZeusGroupScan extends AbstractGroupScan {
   }
 
   @JsonIgnore
-  public ZeusRelNode getRootRelNode() {
+  public ZeusRel getRootRelNode() {
     return rootRelNode;
   }
 }

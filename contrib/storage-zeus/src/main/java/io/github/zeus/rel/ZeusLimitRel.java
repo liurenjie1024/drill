@@ -5,10 +5,10 @@ import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
 import org.apache.drill.exec.physical.base.ScanStats;
 
-public class ZeusLimitNode extends ZeusSingleRelNode {
+public class ZeusLimitRel extends ZeusAbstractSingleRel {
   private final LimitNode limitNode;
 
-  public ZeusLimitNode(ZeusRelNode input, LimitNode limitNode) {
+  public ZeusLimitRel(ZeusRel input, LimitNode limitNode) {
     super(input);
     this.limitNode = limitNode;
   }

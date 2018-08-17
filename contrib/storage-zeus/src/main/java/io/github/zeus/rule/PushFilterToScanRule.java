@@ -21,9 +21,9 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
-import io.github.zeus.rel.ZeusFilterNode;
-import io.github.zeus.rel.ZeusRelNode;
-import io.github.zeus.rel.ZeusScanNode;
+import io.github.zeus.rel.ZeusFilterRel;
+import io.github.zeus.rel.ZeusRel;
+import io.github.zeus.rel.ZeusScanRel;
 import io.github.zeus.rpc.Expression;
 import io.github.zeus.rpc.FilterNode;
 import org.apache.calcite.plan.RelOptRule;
@@ -58,7 +58,7 @@ public class PushFilterToScanRule extends RelOptRule {
         scanRel, condition);
 
     ZeusGroupScan groupScan = (ZeusGroupScan) scanRel.getGroupScan();
-    ZeusExprBuilder builder = new ZeusExprBuilder(groupScan.getTable());
+    ZeusExprBuilder builder = new ZeusExprBuilder(scanRel);
     Optional<Expression> zeusExpr = conditionExp.accept(builder, null);
 
     if (zeusExpr.isPresent()) {
@@ -66,7 +66,7 @@ public class PushFilterToScanRule extends RelOptRule {
           .addConditions(zeusExpr.get())
           .build();
 
-      ZeusFilterNode newRoot = new ZeusFilterNode(groupScan.getRootRelNode(), filterNode);
+      ZeusFilterRel newRoot = new ZeusFilterRel(groupScan.getRootRelNode(), filterNode);
 
       ZeusGroupScan newGroupScan = groupScan.cloneWithNewRootRelNode(newRoot)
         .setRulePushedDown(PushedDownRule.FILTER);
@@ -109,18 +109,18 @@ public class PushFilterToScanRule extends RelOptRule {
    */
   private static ZeusGroupScan tryToPushFilterToScan(Expression filterExpression,
                                                      ZeusGroupScan scan) {
-    ZeusRelNode root = scan.getRootRelNode();
+    ZeusRel root = scan.getRootRelNode();
 
-    if ((root != null) && (root instanceof ZeusFilterNode)) {
-      ZeusFilterNode filterNode = (ZeusFilterNode) root;
+    if ((root != null) && (root instanceof ZeusFilterRel)) {
+      ZeusFilterRel filterNode = (ZeusFilterRel) root;
 
-      ZeusRelNode child = filterNode.getInput();
+      ZeusRel child = filterNode.getInput();
 
-      if ((child != null) && (child instanceof ZeusScanNode)) {
-        ZeusScanNode scanNode = (ZeusScanNode) child;
+      if ((child != null) && (child instanceof ZeusScanRel)) {
+        ZeusScanRel scanNode = (ZeusScanRel) child;
 
-        ZeusScanNode newScanNode = scanNode.cloneWithFilters(filterExpression);
-        ZeusFilterNode newFilterNode = filterNode.cloneWithNewInput(newScanNode);
+        ZeusScanRel newScanNode = scanNode.cloneWithFilters(filterExpression);
+        ZeusFilterRel newFilterNode = filterNode.cloneWithNewInput(newScanNode);
 
         return scan.cloneWithNewRootRelNode(newFilterNode);
       }

@@ -20,7 +20,7 @@ package io.github.zeus.expr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import io.github.zeus.client.exception.CatalogNotFoundException;
+import io.github.zeus.exception.FieldNotFoundException;
 import io.github.zeus.rpc.AggFuncId;
 import io.github.zeus.rpc.AggFunction;
 import io.github.zeus.rpc.ColumnRef;
@@ -31,8 +31,10 @@ import io.github.zeus.rpc.ExpressionType;
 import io.github.zeus.rpc.LiteralExpression;
 import io.github.zeus.rpc.ScalarFuncId;
 import io.github.zeus.rpc.ScalarFunction;
-import io.github.zeus.schema.ZeusTable;
 import io.github.zeus.types.TypeMapping;
+import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.type.RelDataTypeFieldImpl;
+import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.drill.common.expression.BooleanOperator;
 import org.apache.drill.common.expression.FunctionCall;
 import org.apache.drill.common.expression.LogicalExpression;
@@ -56,10 +58,11 @@ import java.util.Optional;
 
 public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, Void, RuntimeException> {
   private static final Logger LOG = LoggerFactory.getLogger(ZeusExprBuilder.class);
-  private final ZeusTable table;
+//  private final ZeusTable table;
+  private final RelNode input;
 
-  public ZeusExprBuilder(ZeusTable table) {
-    this.table = table;
+  public ZeusExprBuilder(RelNode input) {
+    this.input = input;
   }
 
   @Override
@@ -125,14 +128,12 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
   public Optional<Expression> visitSchemaPath(SchemaPath path, Void value) {
     String columnName = path.getLastSegment().getNameSegment().getPath();
 
-    ColumnType columnType = table.getColumnType(columnName)
-        .orElseThrow(
-            () -> CatalogNotFoundException.columnNotFound(table.getDBName(), table.getTableName(), columnName));
+    ColumnType columnType = getColumnType(columnName)
+        .orElseThrow(() -> new FieldNotFoundException(columnName));
 
     ColumnRef columnRef = ColumnRef.newBuilder()
         .setName(columnName)
         .build();
-
 
     return Optional.of(Expression.newBuilder()
         .setExpressionType(ExpressionType.COLUMN_REF)
@@ -141,6 +142,15 @@ public class ZeusExprBuilder extends AbstractExprVisitor<Optional<Expression>, V
         .setFieldType(columnType)
         .build()
     );
+  }
+
+  private Optional<ColumnType> getColumnType(String columnName) {
+    RelDataTypeFieldImpl fieldType = (RelDataTypeFieldImpl) input.getRowType()
+      .getField(columnName, true, false);
+
+    BasicSqlType sqlType = (BasicSqlType) fieldType.getType();
+
+    return TypeMapping.zeusTypeOf(sqlType.getSqlTypeName());
   }
 
   @Override

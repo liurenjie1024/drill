@@ -1,0 +1,13 @@
+{
+  "planId": "",
+  "root": {
+    "nodeId": 0,
+    "children": [],
+    "planNodeType": "GET_ROW_NUM_NODE",
+    "getRowNumNode": {
+      "dbId": 1,
+      "tableId": 1,
+      "alias": "cnt"
+    }
+  }
+}

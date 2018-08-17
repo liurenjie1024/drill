@@ -52,6 +52,10 @@ public class ZeusTable extends DynamicDrillTable {
     return tableSchema.getName();
   }
 
+  public int getDBId() {
+    return parent.getId();
+  }
+
   @Override
   public RelDataType getRowType(final RelDataTypeFactory typeFactory) {
     List<RelDataType> dataTypes = this.tableSchema.getColumnsMap().values().stream()

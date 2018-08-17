@@ -5,10 +5,10 @@ import io.github.zeus.rpc.PlanNodeType;
 import io.github.zeus.rpc.ProjectNode;
 import org.apache.drill.exec.physical.base.ScanStats;
 
-public class ZeusProjectNode extends ZeusSingleRelNode {
+public class ZeusProjectRel extends ZeusAbstractSingleRel {
   private final ProjectNode projectNode;
 
-  public ZeusProjectNode(ZeusRelNode input, ProjectNode projectNode) {
+  public ZeusProjectRel(ZeusRel input, ProjectNode projectNode) {
     super(input);
     this.projectNode = projectNode;
   }

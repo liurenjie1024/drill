@@ -1,6 +1,7 @@
 package io.github.zeus.rule;
 
 import io.github.zeus.ZeusGroupScan;
+import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.InvalidRelException;
@@ -9,7 +10,6 @@ import org.apache.drill.exec.planner.logical.DrillAggregateRel;
 import org.apache.drill.exec.planner.logical.DrillScanRel;
 import org.apache.drill.exec.planner.logical.RelOptHelper;
 import org.apache.drill.exec.planner.physical.AggPrelBase;
-import org.apache.drill.exec.planner.physical.AggPruleBase;
 import org.apache.drill.exec.planner.physical.DrillDistributionTraitDef;
 import org.apache.drill.exec.planner.physical.HashAggPrel;
 import org.apache.drill.exec.planner.physical.Prel;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.github.zeus.rule.PushHashAggregateToScanRule.pushAggToScan;
 
-public class PushZeroGroupByAggToScanRule extends AggPruleBase {
+public class PushZeroGroupByAggToScanRule extends RelOptRule {
   public static final PushZeroGroupByAggToScanRule SINGLETON = new PushZeroGroupByAggToScanRule();
 
   private static final Logger LOG = LoggerFactory.getLogger(PushHashAggregateToScanRule.class);

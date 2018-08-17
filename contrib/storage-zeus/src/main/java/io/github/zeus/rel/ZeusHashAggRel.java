@@ -5,18 +5,12 @@ import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
 import org.apache.drill.exec.physical.base.ScanStats;
 
-public class ZeusHashAggNode extends ZeusSingleRelNode {
-  private final long rowCount;
+public class ZeusHashAggRel extends ZeusAbstractSingleRel {
   private final AggregationNode aggNode;
 
-  public ZeusHashAggNode(ZeusRelNode input, AggregationNode aggNode) {
-    this(input, aggNode, -1);
-  }
-
-  public ZeusHashAggNode(ZeusRelNode input, AggregationNode aggNode, long rowCount) {
+  public ZeusHashAggRel(ZeusRel input, AggregationNode aggNode) {
     super(input);
     this.aggNode = aggNode;
-    this.rowCount = rowCount;
   }
 
   @Override
@@ -31,12 +25,15 @@ public class ZeusHashAggNode extends ZeusSingleRelNode {
   @Override
   public ScanStats getScanStats() {
     ScanStats inputScanStats = getInput().getScanStats();
-    long rowCount = this.rowCount;
-    if (rowCount < 0 ){
+    long rowCount;
+    if (aggNode.getGroupByCount() > 0){
       double ratio = 1 - Math.pow(0.5, aggNode.getGroupByCount());
       rowCount = (long)(inputScanStats.getRecordCount() * ratio);
+    } else {
+      rowCount = 1;
     }
-    return new ScanStats(ScanStats.GroupScanProperty.NO_EXACT_ROW_COUNT,
+
+    return new ScanStats(ScanStats.GroupScanProperty.EXACT_ROW_COUNT,
       rowCount,
       inputScanStats.getCpuCost(),
       inputScanStats.getDiskCost());

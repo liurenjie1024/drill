@@ -9,36 +9,40 @@ import org.apache.drill.exec.physical.base.ScanStats;
 import java.util.Collections;
 import java.util.List;
 
-public class ZeusScanNode implements ZeusRelNode {
+public class ZeusScanRel implements ZeusRel {
   private final long rowCount;
   private final ScanNode scanNode;
 
-  public ZeusScanNode(long rowCount, ScanNode scanNode) {
+  public ZeusScanRel(long rowCount, ScanNode scanNode) {
     this.rowCount = rowCount;
     this.scanNode = scanNode;
   }
 
   @Override
-  public Iterable<ZeusRelNode> getChildren() {
+  public Iterable<ZeusRel> getChildren() {
     return Collections.emptyList();
   }
 
-  public ZeusScanNode cloneWithColumnIds(List<Integer> columnIds) {
+  public ZeusScanRel cloneWithColumnIds(List<Integer> columnIds) {
     ScanNode newScanNode = ScanNode.newBuilder(scanNode)
       .clearColumns()
       .addAllColumns(columnIds)
       .build();
 
-    return new ZeusScanNode(rowCount, newScanNode);
+    return new ZeusScanRel(rowCount, newScanNode);
   }
 
-  public ZeusScanNode cloneWithFilters(Expression filterExpression) {
+  public ZeusScanRel cloneWithFilters(Expression filterExpression) {
     ScanNode newScanNode = ScanNode.newBuilder(scanNode)
       .clearFilters()
       .addFilters(filterExpression)
       .build();
 
-    return new ZeusScanNode(rowCount, newScanNode);
+    return new ZeusScanRel(rowCount, newScanNode);
+  }
+
+  public boolean containsFilter() {
+    return scanNode.getFiltersCount() > 0;
   }
 
   @Override

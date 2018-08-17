@@ -22,13 +22,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
-import io.github.zeus.rel.ZeusHashAggNode;
+import io.github.zeus.rel.ZeusHashAggRel;
 import io.github.zeus.rpc.AggregationNode;
-import io.github.zeus.rpc.ColumnType;
-import io.github.zeus.rpc.ColumnValue;
 import io.github.zeus.rpc.Expression;
-import io.github.zeus.rpc.ExpressionType;
-import io.github.zeus.rpc.LiteralExpression;
 import io.github.zeus.schema.ZeusTable;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
@@ -134,7 +130,7 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
     boolean allConverted = true;
     List<Expression> groupBys = new ArrayList<>(hashAggPrel.getKeys().size());
     for (NamedExpression key : hashAggPrel.getKeys()) {
-      Optional<Expression> groupBy = key.getExpr().accept(new ZeusExprBuilder(table), null);
+      Optional<Expression> groupBy = key.getExpr().accept(new ZeusExprBuilder(scanPrel), null);
       if (!groupBy.isPresent()) {
         allConverted = false;
         break;
@@ -147,31 +143,9 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
       return null;
     }
 
-    boolean zeroGroupBy = false;
-    // If group bys is zero, we add an literal expression
-    if (groupBys.size() == 0) {
-      ColumnValue columnValue = ColumnValue.newBuilder()
-        .setI32Value(1)
-        .build();
-
-      LiteralExpression literalExpression = LiteralExpression.newBuilder()
-        .setValue(columnValue)
-        .build();
-
-      Expression expression = Expression.newBuilder()
-        .setExpressionType(ExpressionType.LITERAL)
-        .setLiteral(literalExpression)
-        .setAlias("__$auto_gen_fake$__")
-        .setFieldType(ColumnType.INT32)
-        .build();
-
-      groupBys.add(expression);
-      zeroGroupBy = true;
-    }
-
     List<Expression> aggs = new ArrayList<>(hashAggPrel.getAggExprs().size());
     for (NamedExpression agg : hashAggPrel.getAggExprs()) {
-      Optional<Expression> aggExpr = agg.getExpr().accept(new ZeusExprBuilder(table), null);
+      Optional<Expression> aggExpr = agg.getExpr().accept(new ZeusExprBuilder(scanPrel), null);
       if (!aggExpr.isPresent()) {
         allConverted = false;
         break;
@@ -192,12 +166,7 @@ public class PushHashAggregateToScanRule extends AggPruleBase {
         .addAllAggFunc(aggs)
         .build();
 
-    ZeusHashAggNode newRoot;
-    if (zeroGroupBy)  {
-      newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode, 1);
-    } else {
-      newRoot = new ZeusHashAggNode(zeusGroupScan.getRootRelNode(), aggNode);
-    }
+    ZeusHashAggRel newRoot = new ZeusHashAggRel(zeusGroupScan.getRootRelNode(), aggNode);
 
     ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot)
       .setRulePushedDown(PushedDownRule.AGG);

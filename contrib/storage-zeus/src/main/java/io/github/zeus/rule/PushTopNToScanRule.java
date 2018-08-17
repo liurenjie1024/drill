@@ -21,10 +21,8 @@ package io.github.zeus.rule;
 import com.google.common.collect.ImmutableList;
 import io.github.zeus.ZeusGroupScan;
 import io.github.zeus.expr.ZeusExprBuilder;
-import io.github.zeus.rel.ZeusTopNNode;
+import io.github.zeus.rel.ZeusTopNRel;
 import io.github.zeus.rpc.Expression;
-import io.github.zeus.rpc.PlanNode;
-import io.github.zeus.rpc.PlanNodeType;
 import io.github.zeus.rpc.TopNNode;
 import io.github.zeus.rpc.TopNNode.SortItem;
 import io.github.zeus.schema.ZeusTable;
@@ -63,7 +61,7 @@ public class PushTopNToScanRule extends RelOptRule {
       scanDrel);
 
     if (topNNode.isPresent()) {
-      ZeusTopNNode newRoot = new ZeusTopNNode(zeusGroupScan.getRootRelNode(), topNNode.get());
+      ZeusTopNRel newRoot = new ZeusTopNRel(zeusGroupScan.getRootRelNode(), topNNode.get());
       ZeusGroupScan newGroupScan = zeusGroupScan.cloneWithNewRootRelNode(newRoot)
         .setRulePushedDown(PushedDownRule.TOPN);
 
@@ -119,7 +117,7 @@ public class PushTopNToScanRule extends RelOptRule {
     boolean allConverted = true;
     for (Ordering ordering : orderBys) {
       Optional<Expression> exprOpt = ordering.getExpr().accept(
-          new ZeusExprBuilder(table), null);
+          new ZeusExprBuilder(input), null);
 
       if (!exprOpt.isPresent()) {
         allConverted = false;

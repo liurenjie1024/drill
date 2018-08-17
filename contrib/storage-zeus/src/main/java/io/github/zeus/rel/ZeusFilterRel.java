@@ -5,10 +5,10 @@ import io.github.zeus.rpc.PlanNode;
 import io.github.zeus.rpc.PlanNodeType;
 import org.apache.drill.exec.physical.base.ScanStats;
 
-public class ZeusFilterNode extends ZeusSingleRelNode {
+public class ZeusFilterRel extends ZeusAbstractSingleRel {
   private final FilterNode filterNode;
 
-  public ZeusFilterNode(ZeusRelNode input, FilterNode filterNode) {
+  public ZeusFilterRel(ZeusRel input, FilterNode filterNode) {
     super(input);
     this.filterNode = filterNode;
   }
@@ -32,7 +32,7 @@ public class ZeusFilterNode extends ZeusSingleRelNode {
       inputScanStats.getDiskCost());
   }
 
-  public ZeusFilterNode cloneWithNewInput(ZeusRelNode newInput) {
-    return new ZeusFilterNode(newInput, filterNode);
+  public ZeusFilterRel cloneWithNewInput(ZeusRel newInput) {
+    return new ZeusFilterRel(newInput, filterNode);
   }
 }

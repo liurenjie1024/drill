@@ -15,14 +15,6 @@
     }],
     "planNodeType": "AGGREGATE_NODE",
     "aggNode": {
-      "groupBy": [{
-        "expressionType": "COLUMN_REF",
-        "column": {
-          "name": "advertiserId"
-        },
-        "alias": "advertiserId",
-        "fieldType": "INT32"
-      }],
       "aggFunc": [{
         "expressionType": "AGG_FUNCTION",
         "aggFunc": {
@@ -67,21 +59,6 @@
           }]
         },
         "alias": "showSum",
-        "fieldType": "INT64"
-      }, {
-        "expressionType": "AGG_FUNCTION",
-        "aggFunc": {
-          "funcId": "SUM_INT64",
-          "children": [{
-            "expressionType": "COLUMN_REF",
-            "column": {
-              "name": "numOfClick"
-            },
-            "alias": "numOfClick",
-            "fieldType": "INT64"
-          }]
-        },
-        "alias": "$f4",
         "fieldType": "INT64"
       }]
     }
