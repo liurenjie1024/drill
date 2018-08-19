@@ -119,7 +119,8 @@ public class ZeusStoragePlugin extends AbstractStoragePlugin {
         new TypeReference<Integer>() {});
     return new ZeusGroupScan(
         tableId,
-        new ZeusScanRel(1000, dbSchema.getTableScanQueryPlan(tableId, paths)),
+        new ZeusScanRel(client.estimateRowCount(dbSchema.getId(), tableId),
+          dbSchema.getTableScanQueryPlan(tableId, paths)),
         config,
         this);
   }

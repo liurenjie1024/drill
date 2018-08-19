@@ -41,6 +41,11 @@ public class FakeZeusClient extends AbstractZeusClient {
   }
 
   @Override
+  public long estimateRowCount(int dbId, int tableId) {
+    return 10000;
+  }
+
+  @Override
   public void close() throws Exception {
   }
 }
